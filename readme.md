@@ -1,10 +1,10 @@
-# some MAX6675 examples with Arduino / Teensy / ESP32
+#some MAX6675 examples with Arduino / Teensy
 
 uses Adafruit MAX6675 library (included)
 
 change the pins to ones on your board.
 
-**serialthermocouple**: sends reading via serial port
+**thermocouple_serial**: sends reading via serial port
 
 **thermocouple_esp32**: esp32 version that runs a simple server that allows probing of temperature via http requests
 
