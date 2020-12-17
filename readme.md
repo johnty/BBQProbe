@@ -1,4 +1,4 @@
-#some MAX6675 examples with Arduino / Teensy
+# some MAX6675 examples with Arduino / Teensy / ESP32
 
 uses Adafruit MAX6675 library (included)
 
