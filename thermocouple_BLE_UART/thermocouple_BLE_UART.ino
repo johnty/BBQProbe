@@ -1,10 +1,4 @@
 /*
- * UART thermocouple probe test. Based on BLE UART example code
- * Formats a single int with \n for use with Adafruit Bluefruit LE Connect plotter
- * 
- * 
- * Original example documentation follows...
- * 
     Video: https://www.youtube.com/watch?v=oCMOYS71NIU
     Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleNotify.cpp
     Ported to Arduino ESP32 by Evandro Copercini
@@ -44,6 +38,10 @@ BLECharacteristic * pTxCharacteristic;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 0;
+
+char sendStr[8];
+int tempF = 100;
+
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -96,7 +94,7 @@ void setup() {
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(
                         CHARACTERISTIC_UUID_TX,
-                        BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_READ); //johnty: added READ
+                        BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_READ); //added READ
 
   pTxCharacteristic->addDescriptor(new BLE2902());
 
@@ -116,22 +114,18 @@ void setup() {
 
 void loop() {
 
-  char sendStr[8];
-  int degF = round(thermocouple.readFahrenheit());
+  tempF = (int)thermocouple.readFahrenheit();
 
-  String str = String(degF) + "\n"; //Adafruit plotter needs this every line
-  str.toCharArray(sendStr, str.length() + 1); //+1 for the final \n
+  int len = snprintf(sendStr, 8 , "%d\n", tempF);
+  //sendStr = strcat(tempF, '\n'); //Adafruit plotter needs this every line
 
   if (deviceConnected) {
-    pTxCharacteristic->setValue((unsigned char*)sendStr, str.length());
+    pTxCharacteristic->setValue((unsigned char*)sendStr, len);
     pTxCharacteristic->notify();
   }
 
-  delay(1000); //1s intervals
-  Serial.print("read tempF = ");
-  Serial.print(degF);
-  Serial.print(" send str = ");
-  Serial.println(sendStr);
+  delay(1000); // bluetooth stack will go into congestion, if too many packets are sent
+  Serial.print(sendStr);
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
